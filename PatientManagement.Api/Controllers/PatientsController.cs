@@ -10,14 +10,12 @@ namespace PatientManagement.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    [EnableCors("AllowOrigin")]
     public class PatientsController : ControllerBase
     {
         private readonly IPatientService _service;
         public PatientsController(IPatientService service) => _service = service;
 
         [HttpGet("{id:guid}")]
-        [AllowAnonymous]
         public async Task<ActionResult<PatientResponseDto>> GetById(Guid id)
         {
             var p = await _service.GetAsync(id);
@@ -26,7 +24,6 @@ namespace PatientManagement.Api.Controllers
         }
 
         [HttpGet("search")]
-        [AllowAnonymous]
         public async Task<ActionResult<PagedResult<PatientResponseDto>>> Search([FromQuery] SearchPatientsRequest req)
         {
             // ModelState will be validated by [ApiController] for DataAnnotations (Range etc.)
@@ -47,7 +44,6 @@ namespace PatientManagement.Api.Controllers
         }
 
         [HttpPost("create")]
-        [AllowAnonymous]
         public async Task<ActionResult<PatientResponseDto>> Create([FromBody] PatientCreateDto dto)
         {
             // check modelstate first (DataAnnotations)
@@ -73,7 +69,6 @@ namespace PatientManagement.Api.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _service.DeleteAsync(id);
