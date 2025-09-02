@@ -122,16 +122,39 @@ Authorization: Bearer <token>
 
 ### Auth
 - `POST /api/auth/token` → Get JWT token  
-
 ---
 
 ## 📊 SQL Queries (Examples)
 
-- Patients diagnosed in last 6 months  
-- Top 3 cities with max patients  
-- Patients with more than 2 conditions  
-- Dynamic patient search stored procedure  
-- Average age of patients grouped by condition  
+## -- Patients diagnosed in last 6 months
+SELECT p.*
+FROM dbo.Patients p
+JOIN dbo.PatientConditions pc ON pc.PatientId = p.Id
+WHERE pc.DiagnosedDate >= DATEADD(MONTH, -6, CAST(GETDATE() AS date));
+
+## -- Top 3 cities with maximum patients
+SELECT TOP (3) City, COUNT(*) AS PatientCount
+FROM dbo.Patients
+GROUP BY City
+ORDER BY COUNT(*) DESC;
+
+## -- Patients with more than 2 conditions
+SELECT p.Id, p.FirstName, p.LastName, COUNT(*) AS ConditionCount
+FROM dbo.Patients p
+JOIN dbo.PatientConditions pc ON p.Id = pc.PatientId
+GROUP BY p.Id, p.FirstName, p.LastName
+HAVING COUNT(*) > 2;
+
+## -- Average age grouped by condition
+SELECT c.Id, c.Name,
+       AVG(DATEDIFF(YEAR, p.DOB, CAST(GETDATE() AS date)) -
+           CASE WHEN DATEADD(YEAR, DATEDIFF(YEAR, p.DOB, CAST(GETDATE() AS date)), p.DOB) > CAST(GETDATE() AS date) THEN 1 ELSE 0 END) AS AvgAge
+FROM dbo.Conditions c
+JOIN dbo.PatientConditions pc ON pc.ConditionId = c.Id
+JOIN dbo.Patients p ON p.Id = pc.PatientId
+GROUP BY c.Id, c.Name
+ORDER BY c.Name;
+
 
 ---
 
